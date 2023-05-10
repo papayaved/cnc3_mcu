@@ -84,6 +84,11 @@ double speed_to_period(double F) {
  */
 double period_to_speed(double T) { return (FPGA_CLOCK * 60.0) / T; }
 
+/* T - clock / mm
+ * result - um / sec
+ */
+float period_to_ums(float T) { return (FPGA_CLOCK * 1000) / T; }
+
 /* F - mm / min
  * result - mm / clock
  */

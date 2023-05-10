@@ -10,7 +10,7 @@ static scale_t scale_xy = {SCALE,		SCALE,		1.0 / SCALE,		1.0 / SCALE}; // steps 
 static scale_t scale_uv = {SCALE_UV,	SCALE_UV,	1.0 / SCALE_UV,		1.0 / SCALE_UV}; // steps / mm
 static scale_t scale_enc = {SCALE_ENC,	SCALE_ENC,	1.0 / SCALE_ENC,	1.0 / SCALE_ENC}; // steps / mm
 
-static float acc = ACC, dec = DEC; // mm/tick^2/V
+static float fb_acc = ACC_V, fb_dec = DEC_V; // mm/tick^2/V
 
 /* result - mean velocity, mm/clock
  * v0 - initial velocity, mm/clock
@@ -37,8 +37,8 @@ void cnc_resetParam() {
 	scale_enc.x = scale_enc.y = SCALE_ENC;
 	scale_enc.x_inv = scale_enc.y_inv = 1.0 / SCALE_ENC;
 
-	acc = ACC;
-	dec = DEC;
+	fb_acc = ACC_V;
+	fb_dec = DEC_V;
 }
 
 BOOL cnc_isIdle();
@@ -56,20 +56,20 @@ double cnc_step() { return step; }
 /* Acceleration and Deceleration in a feedback mode
  * um / s^2
  */
-void cnc_setAcc(float value) { acc = value * COE_UMSEC2_TO_MMTICK2; }
-void cnc_setDec(float value) { dec = value * COE_UMSEC2_TO_MMTICK2; }
+void cnc_setAcc(float value) { fb_acc = value * COE_UMSEC2_TO_MMTICK2; }
+void cnc_setDec(float value) { fb_dec = value * COE_UMSEC2_TO_MMTICK2; }
 
 // um / s^2
-float cnc_getAcc() { return acc * (1.0 / COE_UMSEC2_TO_MMTICK2); }
-float cnc_getDec() { return dec * (1.0 / COE_UMSEC2_TO_MMTICK2); }
+float cnc_getFbAcc() { return fb_acc * (1.0 / COE_UMSEC2_TO_MMTICK2); }
+float cnc_getFbDec() { return fb_dec * (1.0 / COE_UMSEC2_TO_MMTICK2); }
 
 // mm / clock^2
-float cnc_acc() { return acc; }
-float cnc_dec() { return dec; }
+float cnc_acc() { return fb_acc; }
+float cnc_dec() { return fb_dec; }
 
 // mm / clock^2 / Vcode
-float cnc_pidAcc() { return acc * COE_DCODE_TO_VOLT; }
-float cnc_pidDec() { return dec * COE_DCODE_TO_VOLT; }
+float cnc_pidAcc() { return fb_acc * COE_DCODE_TO_VOLT; }
+float cnc_pidDec() { return fb_dec * COE_DCODE_TO_VOLT; }
 
 /* Scale of motors and linear encoders
  * steps / mm

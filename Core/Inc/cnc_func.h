@@ -15,6 +15,7 @@ point_t fpoint_mm_to_steps(const fpoint_t* const pt_mm, const scale_t* const sca
 
 double speed_to_period(double F);
 double period_to_speed(double T);
+float period_to_ums(float T);
 
 double mmm_to_mmclock(double F);
 double mmclock_to_mmm(double F);

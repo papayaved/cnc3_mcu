@@ -6,8 +6,8 @@
 #include "feedback.h"
 
 #define VNOM (100.0) // V
-#define ACC ( 1.0 * COE_UMSEC2_TO_MMTICK2 ) // 100 um/sec2/V
-#define DEC ( 1.0 * COE_UMSEC2_TO_MMTICK2 ) // 100 um/sec2/V
+#define ACC_V ( 1.0 * COE_UMSEC2_TO_MMTICK2 ) // 100 um/sec2/V
+#define DEC_V ( 1.0 * COE_UMSEC2_TO_MMTICK2 ) // 100 um/sec2/V
 
 float velocity(float v0, float acc, float d);
 
@@ -19,8 +19,8 @@ double cnc_step();
 void cnc_setAcc(float value);
 void cnc_setDec(float value);
 
-float cnc_getAcc();
-float cnc_getDec();
+float cnc_getFbAcc();
+float cnc_getFbDec();
 
 float cnc_acc();
 float cnc_dec();

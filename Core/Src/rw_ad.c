@@ -156,6 +156,13 @@ void ad_writeRegs(const size_t addr, size_t len, const uint8_t buf[], const size
 					case 0x34:
 						fpga_setSdOutEnable((wrdata & 1) != 0);
 						fpga_setSdEnable((wrdata & 2) != 0);
+						acc_enable((wrdata & 4) != 0);
+						break;
+					case 0x35:
+						acc_setAcc(*pfloat);
+						break;
+					case 0x36:
+						acc_setDec(*pfloat);
 						break;
 
 					case 0x38:
@@ -229,10 +236,6 @@ void ad_writeRegs(const size_t addr, size_t len, const uint8_t buf[], const size
 						center.angle[2]	= *pfloat;
 						cnc_centerReq(&center);
 						break;
-
-					case 0x80: acc_enable(wrdata & 1); break;
-					case 0x81: acc_setAcc(*pfloat); break;
-					case 0x82: acc_setDec(*pfloat); break;
 
 					case 0xFF: test_reg = wrdata; break;
 
@@ -387,13 +390,19 @@ uint8_t ad_readRegs(uint32_t addr, size_t len, BOOL burst) {
 						rddata = (uint32_t)enc_getDir()<<16 | (uint32_t)fpga_getMotorDir();
 						break;
 					case 0x32:
-						*pfloat = cnc_getAcc() * VNOM; // um/sec2/100V
+						*pfloat = cnc_getFbAcc() * VNOM; // um/sec2/100V
 						break;
 					case 0x33:
-						*pfloat = cnc_getDec() * VNOM;
+						*pfloat = cnc_getFbDec() * VNOM;
 						break;
 					case 0x34:
-						rddata = fpga_getSdEnable()<<1 | fpga_getSdOutEnable();
+						rddata = acc_enabled()<<2 | fpga_getSdEnable()<<1 | fpga_getSdOutEnable();
+						break;
+					case 0x35:
+						*pfloat = acc_getAcc();
+						break;
+					case 0x36:
+						*pfloat = acc_getDec();
 						break;
 
 					case 0x38:
@@ -464,10 +473,6 @@ uint8_t ad_readRegs(uint32_t addr, size_t len, BOOL burst) {
 					case 0x78: *pfloat = center.angle[2]; break;
 
 					case 0x7a: *pfloat = center_D(); break;
-
-					case 0x80: rddata = acc_enabled(); break;
-					case 0x81: *pfloat = acc_getAcc(); break;
-					case 0x82: *pfloat = acc_getDec(); break;
 
 					case 0xF0: rddata = __date32__[0]; break;
 					case 0xF1: rddata = __date32__[1]; break;

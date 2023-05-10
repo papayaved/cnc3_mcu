@@ -16,6 +16,11 @@
 BOOL m_acc_ena = FALSE;
 float m_acc = 100 * COE_UMSEC2_TO_MMTICK2, m_dec = 100  * COE_UMSEC2_TO_MMTICK2; // 100 um/sec^2
 
+void acc_reset() {
+	m_acc_ena = FALSE;
+	m_acc = m_dec = 100  * COE_UMSEC2_TO_MMTICK2;
+}
+
 void acc_enable(BOOL ena) { m_acc_ena = ena != 0; }
 BOOL acc_enabled() { return m_acc_ena; }
 
@@ -74,22 +79,27 @@ double acc_acc(double T, double Tnom, float dL) {
  * 		rem - remained distance, mm;
  * 		dL - elementary step, mm.
  */
-// mm, ticks / mm, mm
-BOOL acc_dec(double* const pT, float rem, float dL) {
-	float T = *pT;
+BOOL acc_brake(float T, float rem) {
+	return m_acc_ena && (T * T * rem * m_dec < 0.5);
+}
 
-	BOOL brake = m_acc_ena && T * T * rem * m_dec < 0.5;
+/*	The function corrects the current speed if deceleration is needed
+ * 	Return:
+ * 		Brake required, boolean
+ * 	Parameters:
+ * 		*pT - current speed and new speed, ticks/mm;
+ * 		rem - remained distance, mm;
+ * 		dL - elementary step, mm.
+ */
+double acc_dec(double T, float rem, float dL) {
+	if (rem > 2 * dL) {
+		float F = 1 / T;
+		float k = 1 - dL / rem;
 
-	if (brake) {
-		if (rem > 2 * dL) {
-			float F = 1 / *pT;
-			float k = 1 - dL / rem;
-
-			float F1 = F * sqrt(k);
-			F = (F + F1) * 0.5;
-			*pT = 1 / F;
-		}
+		float F1 = F * sqrt(k);
+		F = (F + F1) * 0.5;
+		return 1 / F;
 	}
 
-	return brake;
+	return T;
 }

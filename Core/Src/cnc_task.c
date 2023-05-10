@@ -320,6 +320,8 @@ void cnc_mtr_clear() {
 }
 
 void cnc_reset() {
+	cnc_resetParam();
+
 	cnc_state_reset();
 
 	fpga_init();
@@ -328,6 +330,7 @@ void cnc_reset() {
 
 	fb_reset();
 	enc_resetEncMode();
+	acc_reset();
 
 	rb_len = ROLLBACK_DEFAULT;
 	rb_attempts = ROLLBACK_ATTEMPTS;
@@ -966,6 +969,23 @@ static void motor_sm() {
 				point_t next = {0, 0}, uv_next = {0, 0};
 				double t = 0, ts_xy = 0, ts_uv = 0;
 
+				// calculate step number
+				size_t step_id_prev = step_id;
+
+				if (enc_isEncMode()) {
+					step_id = enc_recalc_pos(&mtr_pt, &mtr_uv_pt, &line, &arc, step_id, &is_last[0]);
+
+					if (is_last[0]) {
+						state = ST_WAIT;
+						break;
+					}
+				}
+
+				step_id++;
+
+				if (step_id == step_id_prev) // because of encoders
+					break;
+
 				// calculate speed
 				if (fb_isEnabled()) {
 					if (hv_enabled) {
@@ -985,30 +1005,7 @@ static void motor_sm() {
 				}
 				else if (rb_ena)
 					t = fb_Trb();
-				else
-					t = T;
-
-				T_cur = t;
-
-				// calculate step number
-				size_t step_id_prev = step_id;
-
-				if (enc_isEncMode()) {
-					step_id = enc_recalc_pos(&mtr_pt, &mtr_uv_pt, &line, &arc, step_id, &is_last[0]);
-
-					if (is_last[0]) {
-						state = ST_WAIT;
-						break;
-					}
-				}
-
-				step_id++;
-
-				if (step_id == step_id_prev) // because of encoders
-					break;
-
-				// Correct acceleration
-				if (acc_enabled()) {
+				else if (acc_enabled()) { // Correct acceleration
 					static float rem;
 
 					if (line.valid)
@@ -1018,12 +1015,22 @@ static void motor_sm() {
 					else
 						rem = 0;
 
-					BOOL brake = acc_dec(&t, rem, cnc_step());
+					if ( acc_brake(T_cur, rem) )
+						t = acc_dec(T_cur, rem, cnc_step());
+					else
+						t = acc_acc(T_cur, T, cnc_step());
 
-					if (!brake) {
-						double acc_acc(double T, T, cnc_step());
+#ifdef PRINT
+					if (t < T) {
+						float v = period_to_ums(t);
+						printf("acc %d\n", (int)round(v));
 					}
+#endif
 				}
+				else
+					t = T;
+
+				T_cur = t;
 
 				//
 				if (line.valid) {
