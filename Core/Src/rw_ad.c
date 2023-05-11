@@ -148,20 +148,16 @@ void ad_writeRegs(const size_t addr, size_t len, const uint8_t buf[], const size
 						enc_setDir((uint16_t)(wrdata>>16));
 						break;
 					case 0x32:
-						cnc_setAcc(*pfloat * (1.0 / VNOM)); // um/sec2/V
-						break;
-					case 0x33:
-						cnc_setDec(*pfloat * (1.0 / VNOM));
-						break;
-					case 0x34:
 						fpga_setSdOutEnable((wrdata & 1) != 0);
 						fpga_setSdEnable((wrdata & 2) != 0);
-						acc_enable((wrdata & 4) != 0);
 						break;
-					case 0x35:
+					case 0x33:
+						acc_enable((wrdata & 1) != 0);
+						break;
+					case 0x34:
 						acc_setAcc(*pfloat);
 						break;
-					case 0x36:
+					case 0x35:
 						acc_setDec(*pfloat);
 						break;
 
@@ -185,6 +181,12 @@ void ad_writeRegs(const size_t addr, size_t len, const uint8_t buf[], const size
 						break;
 					case 0x3D:
 						fb_setRollbackSpeed(*pfloat); // mm/min
+						break;
+					case 0x3E:
+						cnc_setAcc(*pfloat * (1.0 / VNOM)); // um/sec2/V
+						break;
+					case 0x3F:
+						cnc_setDec(*pfloat * (1.0 / VNOM));
 						break;
 
 					case 0x40: cnc_setParam(0, *p32); break;
@@ -390,18 +392,15 @@ uint8_t ad_readRegs(uint32_t addr, size_t len, BOOL burst) {
 						rddata = (uint32_t)enc_getDir()<<16 | (uint32_t)fpga_getMotorDir();
 						break;
 					case 0x32:
-						*pfloat = cnc_getFbAcc() * VNOM; // um/sec2/100V
+						rddata = fpga_getSdEnable()<<1 | fpga_getSdOutEnable();
 						break;
 					case 0x33:
-						*pfloat = cnc_getFbDec() * VNOM;
+						rddata = acc_enabled();
 						break;
 					case 0x34:
-						rddata = acc_enabled()<<2 | fpga_getSdEnable()<<1 | fpga_getSdOutEnable();
-						break;
-					case 0x35:
 						*pfloat = acc_getAcc();
 						break;
-					case 0x36:
+					case 0x35:
 						*pfloat = acc_getDec();
 						break;
 
@@ -423,6 +422,12 @@ uint8_t ad_readRegs(uint32_t addr, size_t len, BOOL burst) {
 						break;
 					case 0x3D:
 						*pfloat = fb_getRollbackSpeed(); // mm/min
+						break;
+					case 0x3E:
+						*pfloat = cnc_getFbAcc() * VNOM; // um/sec2/100V
+						break;
+					case 0x3F:
+						*pfloat = cnc_getFbDec() * VNOM;
 						break;
 
 					case 0x40: *p32 = cnc_getParam(0); break;
