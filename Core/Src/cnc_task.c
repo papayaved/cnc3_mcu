@@ -1006,26 +1006,40 @@ static void motor_sm() {
 				else if (rb_ena)
 					t = fb_Trb();
 				else if (acc_enabled()) { // Correct acceleration
+					static int state, i;
 					static float rem;
 
-					if (line.valid)
-						rem = line_remain(&line, step_id);
-					else if (arc.flag.valid)
-						rem = arc_remain(&arc, step_id);
-					else
-						rem = 0;
+					if (line.valid || arc.flag.valid) {
+						if (line.valid)
+							rem = line_remain(&line, step_id);
+						else if (arc.flag.valid)
+							rem = arc_remain(&arc, step_id);
+						else
+							rem = 0;
 
-					if ( acc_brake(T_cur, rem) )
-						t = acc_dec(T_cur, rem, cnc_step());
-					else
-						t = acc_acc(T_cur, T, cnc_step());
-
+						if ( acc_brake(T_cur, rem) ) {
+							t = acc_dec(T_cur, rem, cnc_step());
+							i = state == 2 ? i + 1 : 0;
+							state = 2;
+						}
+						else if (T_cur > T) {
+							t = acc_acc(T_cur, T, cnc_step());
+							i = state == 1 ? i + 1 : 0;
+							state = 1;
+						}
+						else {
+							t = T;
+							state = 0;
+						}
 #ifdef PRINT
-					if (t < T) {
-						float v = period_to_ums(t);
-						printf("acc %d\n", (int)round(v));
-					}
+						if (state != 0) {
+							float v = period_to_ums(t);
+							printf("A%d %d\n", i, (int)round(v)); // print acceleration steps
+						}
 #endif
+					}
+					else
+						t = T;
 				}
 				else
 					t = T;
