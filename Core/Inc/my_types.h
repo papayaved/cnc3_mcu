@@ -86,7 +86,7 @@ typedef union {
         uint32_t rev:1;
         uint32_t rollback:1;
         uint32_t attempt:3;
-        uint32_t :1;
+        uint32_t acc_ena:1;
 
         uint32_t state:8;
 

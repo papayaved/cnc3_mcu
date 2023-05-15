@@ -36,13 +36,21 @@ static BOOL acc_check(float* const acc) {
 }
 
 void acc_setAcc(float acc) {
-	if (acc_check(&acc))
+	if (acc_check(&acc)) {
 		m_acc = acc * COE_UMSEC2_TO_MMTICK2;
+#ifdef PRINT
+		printf("ACC=%d\n", (int)round(acc)); // print acceleration
+#endif
+	}
 }
 
 void acc_setDec(float dec) {
-	if (acc_check(&dec))
+	if (acc_check(&dec)) {
 		m_dec = dec * COE_UMSEC2_TO_MMTICK2;
+#ifdef PRINT
+		printf("DEC=%d\n", (int)round(dec)); // print acceleration
+#endif
+	}
 }
 
 // um / s^2
@@ -80,7 +88,8 @@ double acc_acc(double T, double Tnom, float dL) {
  * 		dL - elementary step, mm.
  */
 BOOL acc_brake(float T, float rem) {
-	return m_acc_ena && (T * T * rem * m_dec < 0.5);
+//	return m_acc_ena && (T * T * rem * m_dec < 0.5f);
+	return m_acc_ena && (T * T * rem * m_dec < 1.0f);
 }
 
 /*	The function corrects the current speed if deceleration is needed
@@ -92,13 +101,13 @@ BOOL acc_brake(float T, float rem) {
  * 		dL - elementary step, mm.
  */
 double acc_dec(double T, float rem, float dL) {
-	if (rem > 2 * dL) {
+	if (rem > dL) {
 		float F = 1 / T;
 		float k = 1 - dL / rem;
 
 		float F1 = F * sqrt(k);
-		F = (F + F1) * 0.5;
-		return 1 / F;
+//		F = (F + F1) * 0.5;
+		return 1 / F1;
 	}
 
 	return T;

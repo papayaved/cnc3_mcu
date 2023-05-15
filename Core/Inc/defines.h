@@ -1,7 +1,7 @@
 #ifndef INC_DEFINES_H_
 #define INC_DEFINES_H_
 
-//#define RESEASE
+#define RESEASE
 #define STONE
 
 #define NAME ("CNC")

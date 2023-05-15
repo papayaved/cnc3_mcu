@@ -8,6 +8,7 @@
 #include "cnc_param.h"
 #include "center.h"
 #include "touch.h"
+#include "acc.h"
 
 static cnc_context_t cnc_ctx;
 
@@ -17,7 +18,7 @@ cnc_context_t* cnc_ctx_getForce() {
 
 	fpga_globalSnapshot();
 
-	memset(&cnc_ctx, 0, sizeof(cnc_context_t)); 
+	memset(&cnc_ctx, 0, sizeof(cnc_context_t));
 	cnc_ctx.field.state = cnc_getState();
 
 	cnc_ctx.field.center_state = center_getState();
@@ -36,6 +37,7 @@ cnc_context_t* cnc_ctx_getForce() {
 	cnc_ctx.field.rev		= cnc_isReverse();
 	cnc_ctx.field.rollback	= cnc_isRollback();
 	cnc_ctx.field.attempt	= cnc_getRollbackAttempt() & 7;
+	cnc_ctx.field.acc_ena	= acc_enabled();
 
 	cnc_ctx.field.x = fpga_getPosX();
 	cnc_ctx.field.y = fpga_getPosY();

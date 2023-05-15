@@ -1011,9 +1011,9 @@ static void motor_sm() {
 
 					if (line.valid || arc.flag.valid) {
 						if (line.valid)
-							rem = line_remain(&line, step_id);
+							rem = line_remain(&line, step_id != 0 ? step_id - 1 : 0);
 						else if (arc.flag.valid)
-							rem = arc_remain(&arc, step_id);
+							rem = arc_remain(&arc, step_id != 0 ? step_id - 1 : 0);
 						else
 							rem = 0;
 
@@ -1032,9 +1032,20 @@ static void motor_sm() {
 							state = 0;
 						}
 #ifdef PRINT
-						if (state != 0) {
-							float v = period_to_ums(t);
-							printf("A%d %d\n", i, (int)round(v)); // print acceleration steps
+						static float v = 0;
+
+						switch (state) {
+						case 1:
+							v = period_to_ums(t);
+							printf("A%d %d\n", i, (int)round(v)); // print acceleration speed
+						break;
+
+						case 2:
+							v = period_to_ums(t);
+							printf("D%d %d\n", i, (int)round(v)); // print deceleration speed
+						break;
+						default:
+							break;
 						}
 #endif
 					}
