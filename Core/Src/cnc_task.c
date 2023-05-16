@@ -659,6 +659,9 @@ static void motor_sm() {
 	else if (stop_req) {
 		run_req = stop_req = FALSE;
 
+		pid_stop();
+		cnc_resetSpeed();
+
 		if (state == ST_SEGMENT || state == ST_PAUSE || state == ST_WAIT || state == ST_READ) {
 			state_reg = state;
 			state = ST_STOP; // endless pause

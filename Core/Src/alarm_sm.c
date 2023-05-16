@@ -47,9 +47,14 @@ void alarm_sm(uint16_t limsw_flags) {
 //		if ((limsw_reg & ~LIM_SOFT_MSK) != 0 && !(limsw_reg | LIM_SOFT_MSK)) // if hard disable and no soft alarm
 //			fpga_setSoftAlarm();
 
+	if (limsw_flags)
+		cnc_resetSpeed();
+
 	if (limsw_flags & LIM_POWER_MSK) { // fpga auto stop at any ls_flags
-		if (state != ST_ALM_POWER)
+		if (state != ST_ALM_POWER) {
 			cnc_onFailure();
+			pid_clear();
+		}
 
 		state = ST_ALM_POWER;
 
@@ -62,6 +67,8 @@ void alarm_sm(uint16_t limsw_flags) {
 			center_reset();
 			cnc_exit();
 		}
+
+		pid_clear();
 
 		if (state != ST_ALM_POWER && state != ST_ALM_WIRE && state != ST_ALM_ALARM && state != ST_ALM_SOFT && state != ST_ALM_EXIT)
 			cnc_onAlarm();
