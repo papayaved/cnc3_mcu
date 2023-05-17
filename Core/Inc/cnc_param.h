@@ -16,17 +16,17 @@ void cnc_resetParam();
 void cnc_setStep(double value);
 double cnc_step();
 
-void cnc_setAcc(float value);
-void cnc_setDec(float value);
+void cnc_setFbAcc(float value);
+void cnc_setFbDec(float value);
 
 float cnc_getFbAcc();
 float cnc_getFbDec();
 
-float cnc_acc();
-float cnc_dec();
+float cnc_fbAcc();
+float cnc_fbDec();
 
-float cnc_pidAcc();
-float cnc_pidDec();
+float cnc_pidFbAcc();
+float cnc_pidFbDec();
 
 const scale_t* cnc_scaleXY();
 double cnc_scaleX();

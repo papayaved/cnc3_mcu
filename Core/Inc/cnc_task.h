@@ -60,8 +60,6 @@ typedef struct {
 } cnc_param_t;
 
 void cnc_resetSpeed();
-void cnc_setEncMode(BOOL ena);
-BOOL enc_isEncMode();
 
 void cnc_clearDirectParam(cnc_param_t* const par);
 

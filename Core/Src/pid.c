@@ -83,13 +83,13 @@ float pid(uint16_t adc, float Tnom, float dL) {
 
 	if (err < 0) {
 		acc_req = FALSE;
-		dF = cnc_pidDec() * err;
+		dF = cnc_pidFbDec() * err;
 	}
 	else {
 		if (acc_req)
-			dF = cnc_pidAcc() * (VNOM * COE_VOLT_TO_DCODE); // err = 100 * (1.638 / 100) / (4.096 / 1<<10) = 410
+			dF = cnc_pidFbAcc() * (VNOM * COE_VOLT_TO_DCODE); // err = 100 * (1.638 / 100) / (4.096 / 1<<10) = 410
 		else
-			dF = cnc_pidAcc() * err;
+			dF = cnc_pidFbAcc() * err;
 	}
 
 	Fp = velocity(F0, dF, dL);

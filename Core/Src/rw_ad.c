@@ -183,10 +183,10 @@ void ad_writeRegs(const size_t addr, size_t len, const uint8_t buf[], const size
 						fb_setRollbackSpeed(*pfloat); // mm/min
 						break;
 					case 0x3E:
-						cnc_setAcc(*pfloat * (1.0 / VNOM)); // um/sec2/V
+						cnc_setFbAcc(*pfloat * (1.0 / VNOM)); // um/sec2/V
 						break;
 					case 0x3F:
-						cnc_setDec(*pfloat * (1.0 / VNOM));
+						cnc_setFbDec(*pfloat * (1.0 / VNOM));
 						break;
 
 					case 0x40: cnc_setParam(0, *p32); break;

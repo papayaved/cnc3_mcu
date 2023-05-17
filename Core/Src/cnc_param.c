@@ -56,20 +56,20 @@ double cnc_step() { return step; }
 /* Acceleration and Deceleration in a feedback mode
  * um / s^2
  */
-void cnc_setAcc(float value) { fb_acc = value * COE_UMSEC2_TO_MMTICK2; }
-void cnc_setDec(float value) { fb_dec = value * COE_UMSEC2_TO_MMTICK2; }
+void cnc_setFbAcc(float value) { fb_acc = value * COE_UMSEC2_TO_MMTICK2; }
+void cnc_setFbDec(float value) { fb_dec = value * COE_UMSEC2_TO_MMTICK2; }
 
 // um / s^2
 float cnc_getFbAcc() { return fb_acc * (1.0 / COE_UMSEC2_TO_MMTICK2); }
 float cnc_getFbDec() { return fb_dec * (1.0 / COE_UMSEC2_TO_MMTICK2); }
 
 // mm / clock^2
-float cnc_acc() { return fb_acc; }
-float cnc_dec() { return fb_dec; }
+float cnc_fbAcc() { return fb_acc; }
+float cnc_fbDec() { return fb_dec; }
 
 // mm / clock^2 / Vcode
-float cnc_pidAcc() { return fb_acc * COE_DCODE_TO_VOLT; }
-float cnc_pidDec() { return fb_dec * COE_DCODE_TO_VOLT; }
+float cnc_pidFbAcc() { return fb_acc * COE_DCODE_TO_VOLT; }
+float cnc_pidFbDec() { return fb_dec * COE_DCODE_TO_VOLT; }
 
 /* Scale of motors and linear encoders
  * steps / mm

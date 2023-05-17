@@ -4,6 +4,7 @@
 #include "cnc_task.h"
 #include "feedback.h"
 #include "encoder.h"
+#include "enc_recalc_pos.h"
 #include "sem_led.h"
 #include "cnc_param.h"
 #include "center.h"
