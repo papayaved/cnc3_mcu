@@ -10,6 +10,7 @@
 #include "center.h"
 #include "touch.h"
 #include "acc.h"
+#include "uv.h"
 
 static cnc_context_t cnc_ctx;
 
@@ -61,6 +62,8 @@ cnc_context_t* cnc_ctx_getForce() {
 	cnc_ctx.field.is_init = cnc_isInit();
 
 	cnc_ctx.field.drum_vel = data32_reg.field.drum_vel;
+	cnc_ctx.field.dia_ena = uv_dia_valid();
+
 	cnc_ctx.field.voltage_level = data32_reg.field.voltage_level;
 	cnc_ctx.field.current_index = getCurrentIndex(data32_reg.data);
 

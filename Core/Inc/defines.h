@@ -2,10 +2,7 @@
 #define INC_DEFINES_H_
 
 #define RESEASE
-#define STONE
-
-#define NAME ("CNC")
-#define MODEL ("3.1")
+//#define STONE
 
 #if defined(RESEASE)
 	#define VER_TYPE (1) // 0 - stable, 1 - alpha, 2 - beta
@@ -39,13 +36,16 @@
  * 1.15 - added pa_clear() after cutting
  * 1.16 - from cnc2
  * 1.17 - soft pult abort at alarm
- * 1.18 - locked drum in FPGA (todo as in cnc2), move state machine alarm_sm to a separated file and rewrite logic, changed M commands, added low and high voltage thresholds
- * 1.19 - adding acceleration and deceleration by path
+ * 3.0.1.18 - locked drum in FPGA (todo as in cnc2), move state machine alarm_sm to a separated file and rewrite logic, changed M commands, added low and high voltage thresholds
+ * 3.1.3.2 - adding acceleration and deceleration by path. Sync version number this CNC2.0
  */
-#define FAC_VER (3)
-#define FAC_REV (1) // CNC3.1
-#define VER (1)
-#define REV (19)
+
+#define DESC ("Meatec;CNC;Mikhail Menshikov")
+
+#define FAC_VER (3) // CNC3
+#define FAC_REV (1)
+#define VER (3)
+#define REV (2)
 
 #ifndef MAX
 	#define MAX(X, Y) ((X) > (Y) ? (X) : (Y))

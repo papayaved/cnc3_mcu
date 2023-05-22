@@ -133,6 +133,9 @@ void ad_writeRegs(const size_t addr, size_t len, const uint8_t buf[], const size
 
 						 if (wrdata & 1<<(16 + 8))
 							 cnc_enableUV((wrdata & 1<<8) != 0);
+
+						 if (wrdata & 1<<(16 + 9))
+							 uv_enableRollerDia((wrdata & 1<<9) != 0);
 						break;
 
 					// Settings
@@ -239,6 +242,9 @@ void ad_writeRegs(const size_t addr, size_t len, const uint8_t buf[], const size
 						cnc_centerReq(&center);
 						break;
 
+					case 0x80: LHTD
+						break;
+
 					case 0xFF: test_reg = wrdata; break;
 
 //					case 0x100: if (!cnc_run()) pa_setBegin(wrdata); break;
@@ -290,11 +296,14 @@ void ad_writeBurst_irq(const size_t addr, size_t len, const uint8_t buf[], const
 		pa_writeBytes(addr & ~ADDR_MASK, len, buf, N, 5);
 }
 
+const char desc[64] = DESC;
+const uint32_t* const desc32 = (uint32_t*)desc;
+
 const char __date__[16] = __DATE__; // Date of program compilation. Format: MMM DD YYYY. Size 12 bytes.
 const char __time__[16] = __TIME__; // Time of compilation. Format: HH:MM:SS. Size 9 bytes.
 
-const uint32_t* __date32__ = (uint32_t*)__date__;
-const uint32_t* __time32__ = (uint32_t*)__time__;
+const uint32_t* const __date32__ = (uint32_t*)__date__;
+const uint32_t* const __time32__ = (uint32_t*)__time__;
 
 /*
  * Function reads data and send them to USB
@@ -379,7 +388,7 @@ uint8_t ad_readRegs(uint32_t addr, size_t len, BOOL burst) {
 					case 0x2B: *pfloat = (float)cnc_scaleV(); break;
 					case 0x2C: *pfloat = (float)cnc_scaleEncX(); break;
 					case 0x2D: *pfloat = (float)cnc_scaleEncY(); break;
-					case 0x2E: rddata = (uint32_t)cnc_uvEnabled()<<8 | (uint32_t)enc_isEncMode()<<0; break;
+					case 0x2E: rddata = (uint32_t)uv_dia_valid()<<9 | (uint32_t)cnc_uvEnabled()<<8 | (uint32_t)enc_isEncMode()<<0; break;
 
 					// Settings
 					case 0x30:
@@ -479,6 +488,23 @@ uint8_t ad_readRegs(uint32_t addr, size_t len, BOOL burst) {
 
 					case 0x7a: *pfloat = center_D(); break;
 
+					case 0xE0: rddata = desc32[0]; break;
+					case 0xE1: rddata = desc32[1]; break;
+					case 0xE2: rddata = desc32[2]; break;
+					case 0xE3: rddata = desc32[3]; break;
+					case 0xE4: rddata = desc32[4]; break;
+					case 0xE5: rddata = desc32[5]; break;
+					case 0xE6: rddata = desc32[6]; break;
+					case 0xE7: rddata = desc32[7]; break;
+					case 0xE8: rddata = desc32[8]; break;
+					case 0xE9: rddata = desc32[9]; break;
+					case 0xEA: rddata = desc32[10]; break;
+					case 0xEB: rddata = desc32[11]; break;
+					case 0xEC: rddata = desc32[12]; break;
+					case 0xED: rddata = desc32[13]; break;
+					case 0xEE: rddata = desc32[14]; break;
+					case 0xEF: rddata = desc32[15]; break;
+
 					case 0xF0: rddata = __date32__[0]; break;
 					case 0xF1: rddata = __date32__[1]; break;
 					case 0xF2: rddata = __date32__[2]; break;
@@ -525,7 +551,9 @@ uint8_t ad_readRegs(uint32_t addr, size_t len, BOOL burst) {
 					}
 						break;
 
-					default: rddata = 0; break;
+					default:
+						rddata = 0;
+						break;
 				}
 			else if (addr32 < 0x220) {
 				rddata = bkp_readRegU32(addr32 & 0x1F);

@@ -70,7 +70,6 @@ static double rb_len = ROLLBACK_DEFAULT;
 static unsigned rb_attempts = ROLLBACK_ATTEMPTS, rb_attempt;
 
 static BOOL fault;
-
 BOOL cnc_fault() { return fault || soft_wdt(); }
 
 void cnc_clearDirectParam(cnc_param_t* const par) {
@@ -270,12 +269,14 @@ void cnc_centerReq(const center_t* const pcenter) {
 
 // for recovery
 void cnc_enableUV(BOOL value) {
-	if (state == ST_IDLE)
+	if (state == ST_IDLE) {
 		pa_enableUV(value);
+		uv_applyParameters();
+	}
 }
 
 BOOL cnc_uvEnabled() {
-	return pa_plane() == PLANE_XYUV;
+	return pa_plane() == PLANE_XYUV && uv_valid();
 }
 
 void cnc_state_reset() {
@@ -285,7 +286,7 @@ void cnc_state_reset() {
 	hv_enabled = fb_flag = FALSE;
 	run_req = stop_req = cancel_req = imit_ena = rev_req = update_pos_req = FALSE;
 
-	T_cur = FLT_MAX;
+	cnc_resetSpeed();
 	T_pause = 0;
 
 	cnc_clearDirectParam(&cnc_par);
@@ -321,7 +322,6 @@ void cnc_mtr_clear() {
 
 void cnc_reset() {
 	cnc_resetParam();
-
 	cnc_state_reset();
 
 	fpga_init();
@@ -397,6 +397,9 @@ void cnc_goto(uint32_t str_num) {
 		state = ST_STOP;
 		state_reg = ST_READ; // init segment
 
+		pid_clear();
+		cnc_resetSpeed();
+		
 #ifdef SOFT_WDT
 		soft_wdt_enable(TRUE);
 #endif
@@ -464,6 +467,9 @@ static BOOL cnc_rb() {
 					state_reg = ST_READ;
 					rev_req = FALSE; // ?
 
+					pid_clear();
+					cnc_resetSpeed();
+					
 					return TRUE;
 				}
 				else { // rollback continue
@@ -488,6 +494,9 @@ static BOOL cnc_rb() {
 
 		cnc_setRevForce(TRUE);
 
+		pid_clear();
+		cnc_resetSpeed();
+		
 		state = ST_READ;
 		return TRUE;
 	}
@@ -552,7 +561,10 @@ void cnc_task() {
 		}
 #endif
 		pid_clear();
-		T_cur = FLT_MAX;
+		cnc_resetSpeed();
+	} else if (status & FLAG_NO_PERMIT_MSK) { // external STOP signal
+		pid_clear();
+		cnc_resetSpeed();
 	}
 
 	status &= FLAG_LIMSW_MSK | FLAG_NO_PERMIT_MSK | FLAG_TIMEOUT_MSK;
@@ -661,10 +673,13 @@ static void motor_sm() {
 
 		pid_stop();
 		cnc_resetSpeed();
-
+		
 		if (state == ST_SEGMENT || state == ST_PAUSE || state == ST_WAIT || state == ST_READ) {
 			state_reg = state;
 			state = ST_STOP; // endless pause
+
+			pid_clear();
+			cnc_resetSpeed();
 		}
 		else if (state == ST_END)
 			cnc_exit();
@@ -687,8 +702,10 @@ static void motor_sm() {
 			fpga_clearSoftAlarm();
 			fpga_clearTimeout();
 			pa_gotoBegin();
+			
 			pid_clear();
-			T_cur = FLT_MAX;
+			cnc_resetSpeed();
+			
 			enc_clearEncModeRegs();
 
 //					if (rev_req) {
@@ -914,6 +931,9 @@ static void motor_sm() {
 				if (cmd.valid.flag.P) {
 					T_pause = fpga_MsToPauseTicks( gcmd_P(&cmd) );
 					state = ST_PAUSE;
+
+					pid_stop();
+					cnc_resetSpeed();
 				}
 				break;
 
@@ -1138,7 +1158,7 @@ static void motor_sm() {
 #endif
 			}
 			else {
-				T_cur = FLT_MAX;
+				cnc_resetSpeed();
 
 				if (fb_flag)
 					pid_clear();
@@ -1330,6 +1350,14 @@ BOOL cnc_setMCmd(const gcmd_t* const cmd) {
 				uv_applyParameters();
 			}
 			break;
+			
+		case 102:
+			if (cmd->valid.flag.P && cmd->valid.flag.Q) {
+				uv_setRollerDia( gcmd_P(cmd) );
+				uv_setRollerAxis( (int)gcmd_Q(cmd) );
+				uv_enableRollerDia(TRUE);
+			}
+			break;
 
 		case 105:
 			if (cmd->valid.flag.P) {
@@ -1359,14 +1387,14 @@ BOOL cnc_setMCmd(const gcmd_t* const cmd) {
 			}
 			break;
 
-		case 108:
+		case 108:						   
 				cnc_par.low_hv_ena = TRUE;
-				gpo_setVoltageLevel(TRUE);
+				gpo_setVoltageLevel(TRUE);	
 			break;
 
-		case 109:
+		case 109:						   
 				cnc_par.low_hv_ena = FALSE;
-				gpo_setVoltageLevel(FALSE);
+				gpo_setVoltageLevel(FALSE);	
 			break;
 
 		case 110:

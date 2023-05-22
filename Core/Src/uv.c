@@ -7,7 +7,11 @@
 static double L = 0; // distance between top and bottom rollers, mm
 static double H = 0; // height from bottom roller to workpiece bottom (XY), mm
 static double T = 0; // workpiece thickness, mm
-static BOOL valid;
+static BOOL valid = FALSE;
+
+static AXIS_T roller_axis = AXIS_X; // roller plane
+static double roller_dia = 0; // roller diameter, mm
+static BOOL dia_valid = FALSE;
 
 int32_t u_max = (int32_t)INT32_MAX, u_min = (int32_t)INT32_MIN; // todo
 int32_t v_max = (int32_t)INT32_MAX, v_min = (int32_t)INT32_MIN;
@@ -42,22 +46,39 @@ void uv_setT(double value) {
 }
 double uv_getT() { return T; }
 
+void uv_clearLHT() {
+	L = H = T = 0;
+	valid = FALSE;
+}
+
+void uv_clearDia() {
+	roller_axis = AXIS_X;
+	roller_dia = 0;
+	dia_valid = FALSE;
+}
+
 BOOL uv_applyParameters() {
+#ifndef STONE
 	if (L > 0 && H > 0 && T > 0 && H + T < L)
 		valid = TRUE;
 	else
-		uv_clear();
+		uv_clearLHT();
 
 #ifdef PRINT
 	printf("LHT:%x\n", valid);
+#endif
+
+#else
+	valid = FALSE;
 #endif
 
 	return valid;
 }
 
 void uv_clear() {
-	L = H = T = 0;
-	valid = FALSE;
+	uv_clearLHT();
+	uv_clearDia();
+
 #ifdef PRINT
 	printf("LHT.CLR\n");
 #endif
@@ -67,7 +88,16 @@ void uv_defaultParam() {
 	L = UV_L;
 	H = UV_H;
 	T = UV_T;
+
+	roller_dia = UV_D + UV_WIRE_D / 2; // diameter + half of wire diameter
+	roller_axis = AXIS_X;
+
+#ifndef STONE
 	valid = TRUE;
+	dia_valid = FALSE;
+#else
+	valid = dia_valid = FALSE;
+#endif
 }
 
 BOOL uv_valid() { return valid; }
@@ -200,3 +230,28 @@ void uv_tb() {
 
 	printf("[%d.%d, %d.%d, %d.%d, %d.%d]\n", x2.value, x2.rem, y2.value, y2.rem, u2.value, u2.rem, v2.value, v2.rem);
 }
+
+// Roller compensation
+
+void uv_setRollerDia( double dia ) { roller_dia = dia; }
+void uv_setRollerAxis( BOOL axis ) { roller_axis = axis; }
+
+BOOL uv_enableRollerDia(BOOL ena) {
+#ifndef STONE
+	if (ena != 0 && roller_dia >= UV_D_MIN && roller_dia <= UV_D_MAX && (roller_axis == AXIS_X || roller_axis == AXIS_Y))
+		dia_valid = TRUE;
+	else
+		uv_clearDia();
+
+#ifdef PRINT
+	printf("Roller:%x\n", valid);
+#endif
+
+#else
+	dia_valid = FALSE;
+#endif
+
+	return dia_valid;
+}
+
+BOOL uv_dia_valid() { return valid && dia_valid; }
