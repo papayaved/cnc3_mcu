@@ -33,7 +33,7 @@ cnc_context_t* cnc_ctx_getForce() {
 	cnc_ctx.field.touches = touches();
 
 	cnc_ctx.field.uv_ena = cnc_uvEnabled();
-	cnc_ctx.field.enc_mode = enc_isEncMode();
+	cnc_ctx.field.enc_ena = enc_isEncMode();
 	cnc_ctx.field.id = fpga_getTaskID();
 
 	cnc_ctx.field.rev		= cnc_isReverse();
@@ -62,7 +62,7 @@ cnc_context_t* cnc_ctx_getForce() {
 	cnc_ctx.field.is_init = cnc_isInit();
 
 	cnc_ctx.field.drum_vel = data32_reg.field.drum_vel;
-	cnc_ctx.field.dia_ena = uv_dia_valid();
+	cnc_ctx.field.dia_ena = uv_DValid();
 
 	cnc_ctx.field.voltage_level = data32_reg.field.voltage_level;
 	cnc_ctx.field.current_index = getCurrentIndex(data32_reg.data);

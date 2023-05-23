@@ -24,6 +24,7 @@
 #include "my_wdt.h"
 #include "enc_recalc_pos.h"
 #include "acc.h"
+#include "uv.h"
 
 void burst_read_reset();
 
@@ -130,12 +131,6 @@ void ad_writeRegs(const size_t addr, size_t len, const uint8_t buf[], const size
 					case 0x2E:
 						 if (wrdata & 1<<16) // mask
 							 enc_setEncMode(wrdata & 1); // data
-
-						 if (wrdata & 1<<(16 + 8))
-							 cnc_enableUV((wrdata & 1<<8) != 0);
-
-						 if (wrdata & 1<<(16 + 9))
-							 uv_enableRollerDia((wrdata & 1<<9) != 0);
 						break;
 
 					// Settings
@@ -242,7 +237,14 @@ void ad_writeRegs(const size_t addr, size_t len, const uint8_t buf[], const size
 						cnc_centerReq(&center);
 						break;
 
-					case 0x80: LHTD
+					case 0x80: uv_setL(*pfloat); break;
+					case 0x81: uv_setH(*pfloat); break;
+					case 0x82: uv_setT(*pfloat); break;
+					case 0x83: uv_setD(*pfloat); break;
+					case 0x84:
+						uv_setDAxis(wrdata & 1);
+						cnc_enableUV(wrdata & 2);
+						uv_enableD(wrdata & 4);
 						break;
 
 					case 0xFF: test_reg = wrdata; break;
@@ -388,7 +390,7 @@ uint8_t ad_readRegs(uint32_t addr, size_t len, BOOL burst) {
 					case 0x2B: *pfloat = (float)cnc_scaleV(); break;
 					case 0x2C: *pfloat = (float)cnc_scaleEncX(); break;
 					case 0x2D: *pfloat = (float)cnc_scaleEncY(); break;
-					case 0x2E: rddata = (uint32_t)uv_dia_valid()<<9 | (uint32_t)cnc_uvEnabled()<<8 | (uint32_t)enc_isEncMode()<<0; break;
+					case 0x2E: rddata = (uint32_t)enc_isEncMode()<<0; break;
 
 					// Settings
 					case 0x30:
@@ -487,6 +489,14 @@ uint8_t ad_readRegs(uint32_t addr, size_t len, BOOL burst) {
 					case 0x78: *pfloat = center.angle[2]; break;
 
 					case 0x7a: *pfloat = center_D(); break;
+
+					case 0x80: *pfloat = uv_getL(); break;
+					case 0x81: *pfloat = uv_getH(); break;
+					case 0x82: *pfloat = uv_getT(); break;
+					case 0x83: *pfloat = uv_getD(); break;
+					case 0x84:
+						rddata = (uint32_t)uv_DValid()<<2 | (uint32_t)uv_valid()<<1 | ((uint32_t)uv_getDAxis() & 1);
+						break;
 
 					case 0xE0: rddata = desc32[0]; break;
 					case 0xE1: rddata = desc32[1]; break;

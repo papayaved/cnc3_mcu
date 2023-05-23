@@ -9,9 +9,9 @@ static double H = 0; // height from bottom roller to workpiece bottom (XY), mm
 static double T = 0; // workpiece thickness, mm
 static BOOL valid = FALSE;
 
-static AXIS_T roller_axis = AXIS_X; // roller plane
-static double roller_dia = 0; // roller diameter, mm
-static BOOL dia_valid = FALSE;
+static AXIS_T D_axis = AXIS_X; // roller plane
+static double D = 0; // roller diameter, mm
+static BOOL d_valid = FALSE;
 
 int32_t u_max = (int32_t)INT32_MAX, u_min = (int32_t)INT32_MIN; // todo
 int32_t v_max = (int32_t)INT32_MAX, v_min = (int32_t)INT32_MIN;
@@ -51,15 +51,15 @@ void uv_clearLHT() {
 	valid = FALSE;
 }
 
-void uv_clearDia() {
-	roller_axis = AXIS_X;
-	roller_dia = 0;
-	dia_valid = FALSE;
+void uv_clearD() {
+	D_axis = AXIS_X;
+	D = 0;
+	d_valid = FALSE;
 }
 
-BOOL uv_applyParameters() {
+BOOL uv_enableLHT(BOOL ena) {
 #ifndef STONE
-	if (L > 0 && H > 0 && T > 0 && H + T < L)
+	if (ena != 0 && L > 0 && H > 0 && T > 0 && H + T < L)
 		valid = TRUE;
 	else
 		uv_clearLHT();
@@ -77,7 +77,7 @@ BOOL uv_applyParameters() {
 
 void uv_clear() {
 	uv_clearLHT();
-	uv_clearDia();
+	uv_clearD();
 
 #ifdef PRINT
 	printf("LHT.CLR\n");
@@ -89,14 +89,14 @@ void uv_defaultParam() {
 	H = UV_H;
 	T = UV_T;
 
-	roller_dia = UV_D + UV_WIRE_D / 2; // diameter + half of wire diameter
-	roller_axis = AXIS_X;
+	D = UV_D + UV_WIRE_D / 2; // diameter + half of wire diameter
+	D_axis = AXIS_X;
 
 #ifndef STONE
 	valid = TRUE;
-	dia_valid = FALSE;
+	d_valid = FALSE;
 #else
-	valid = dia_valid = FALSE;
+	valid = d_valid = FALSE;
 #endif
 }
 
@@ -201,7 +201,7 @@ void uv_tb() {
 	uv_setL( 190 );
 	uv_setH( 50 );
 	uv_setT( 30 );
-	uv_applyParameters();
+	uv_enableLHT(TRUE);
 
 //	fpoint_t XY = {3, 0};
 //	fpoint_t UV = {5.368, 0};
@@ -233,25 +233,28 @@ void uv_tb() {
 
 // Roller compensation
 
-void uv_setRollerDia( double dia ) { roller_dia = dia; }
-void uv_setRollerAxis( BOOL axis ) { roller_axis = axis; }
+void uv_setD( double dia ) { D = dia; }
+double uv_getD() { return D; }
 
-BOOL uv_enableRollerDia(BOOL ena) {
+void uv_setDAxis( BOOL axis ) { D_axis = axis; }
+AXIS_T uv_getDAxis() { return D_axis; }
+
+BOOL uv_enableD(BOOL ena) {
 #ifndef STONE
-	if (ena != 0 && roller_dia >= UV_D_MIN && roller_dia <= UV_D_MAX && (roller_axis == AXIS_X || roller_axis == AXIS_Y))
-		dia_valid = TRUE;
+	if (ena != 0 && D >= UV_D_MIN && D <= UV_D_MAX && (D_axis == AXIS_X || D_axis == AXIS_Y))
+		d_valid = TRUE;
 	else
-		uv_clearDia();
+		uv_clearD();
 
 #ifdef PRINT
 	printf("Roller:%x\n", valid);
 #endif
 
 #else
-	dia_valid = FALSE;
+	d_valid = FALSE;
 #endif
 
-	return dia_valid;
+	return d_valid;
 }
 
-BOOL uv_dia_valid() { return valid && dia_valid; }
+BOOL uv_DValid() { return valid && d_valid; }

@@ -269,10 +269,10 @@ void cnc_centerReq(const center_t* const pcenter) {
 
 // for recovery
 void cnc_enableUV(BOOL value) {
-	if (state == ST_IDLE) {
-		pa_enableUV(value);
-		uv_applyParameters();
-	}
+	value = value != 0 && state == ST_IDLE;
+
+	pa_enableUV(value);
+	uv_enableLHT(value);
 }
 
 BOOL cnc_uvEnabled() {
@@ -1347,15 +1347,15 @@ BOOL cnc_setMCmd(const gcmd_t* const cmd) {
 		case 101:
 			if (cmd->valid.flag.P) {
 				uv_setT( gcmd_P(cmd) );
-				uv_applyParameters();
+				uv_enableLHT(TRUE);
 			}
 			break;
 			
 		case 102:
 			if (cmd->valid.flag.P && cmd->valid.flag.Q) {
-				uv_setRollerDia( gcmd_P(cmd) );
-				uv_setRollerAxis( (int)gcmd_Q(cmd) );
-				uv_enableRollerDia(TRUE);
+				uv_setD( gcmd_P(cmd) );
+				uv_setDAxis( (int)gcmd_Q(cmd) );
+				uv_enableD(TRUE);
 			}
 			break;
 

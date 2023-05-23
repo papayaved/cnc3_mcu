@@ -245,7 +245,7 @@ BOOL cnc_test_rev() {
 	uv_setL( 150 );
 	uv_setH( 50 );
 	uv_setT( 30 );
-	uv_applyParameters();
+	uv_enableLHT(TRUE);
 
 	arc_initCenter(&arc, &A, &B, &C, FALSE, step, cnc_scaleXY());
 	line_init(&uv_line, &A, &B, FALSE, step);

@@ -83,7 +83,7 @@ typedef union {
         uint32_t dia_ena:1;
 
         uint32_t uv_ena:1;
-        uint32_t enc_mode:1;
+        uint32_t enc_ena:1;
         uint32_t rev:1;
         uint32_t rollback:1;
         uint32_t attempt:3;

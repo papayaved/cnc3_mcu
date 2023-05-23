@@ -20,11 +20,24 @@ void uv_setH(double value);
 double uv_getH();
 void uv_setT(double value);
 double uv_getT();
-BOOL uv_applyParameters();
-void uv_clearLHT();
-void uv_defaultParam();
+
+BOOL uv_enableLHT(BOOL ena);
 BOOL uv_valid();
 
+void uv_clearLHT();
+void uv_defaultParam();
+
+//
+void uv_setD(double dia);
+double uv_getD();
+
+void uv_setDAxis(BOOL a);
+AXIS_T uv_getDAxis();
+
+BOOL uv_enableD(BOOL ena);
+BOOL uv_DValid();
+
+//
 double uv_X_to_motor(double X, double U);
 double uv_U_to_motor(double X, double U);
 double uv_Y_to_motor(double Y, double V);
@@ -43,10 +56,5 @@ fpoint_t uv_motors_to_UV(const fpoint_t* const XYm, const fpoint_t* const UVm);
 point_t uv_limit(point_t pt);
 
 void uv_tb();
-
-void uv_setRollerDia( double dia );
-void uv_setRollerAxis( BOOL a );
-BOOL uv_enableRollerDia(BOOL ena);
-BOOL uv_dia_valid();
 
 #endif /* INC_UV_H_ */
