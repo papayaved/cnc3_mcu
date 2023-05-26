@@ -56,15 +56,15 @@ cnc_context_t* cnc_ctx_getForce() {
 	cnc_ctx.field.pump_ena = data32_reg.field.pump_ena;
 	cnc_ctx.field.drum_state = data32_reg.field.drum_state;
 	cnc_ctx.field.wire_ena = limsw_mask_reg.field.wire_ctrl;
-	cnc_ctx.field.voltage_ena = data32_reg.field.voltage_ena;
+	cnc_ctx.field.hv_ena = data32_reg.field.hv_ena;
 	cnc_ctx.field.hold_ena = hold_ena;
 	cnc_ctx.field.center_ena = data32_reg.field.center_ena;
 	cnc_ctx.field.is_init = cnc_isInit();
 
 	cnc_ctx.field.drum_vel = data32_reg.field.drum_vel;
-	cnc_ctx.field.dia_ena = uv_DValid();
+	cnc_ctx.field.d_ena = uv_DValid();
 
-	cnc_ctx.field.voltage_level = data32_reg.field.voltage_level;
+	cnc_ctx.field.low_hv_ena = data32_reg.field.low_hv_ena;
 	cnc_ctx.field.current_index = getCurrentIndex(data32_reg.data);
 
 	cnc_ctx.field.pulse_width = data32_reg.field.pulse_width;
@@ -82,9 +82,9 @@ cnc_context_t* cnc_ctx_getForce() {
     cnc_ctx.field.pwr			= (limsw_reg & LIM_POWER_MSK) != 0;
 
     uint16_t flags = fpga_getStatus();
-    cnc_ctx.field.fb_stop	= (flags & FLAG_NO_PERMIT_MSK) != 0;
-    cnc_ctx.field.fb_to		= (flags & FLAG_TIMEOUT_MSK) != 0;
-    cnc_ctx.field.hv_ena	= (flags & FLAG_HV_ENA_MSK) != 0;
+    cnc_ctx.field.fb_stop		= (flags & FLAG_NO_PERMIT_MSK) != 0;
+    cnc_ctx.field.fb_to			= (flags & FLAG_TIMEOUT_MSK) != 0;
+    cnc_ctx.field.hv_enabled	= (flags & FLAG_HV_ENA_MSK) != 0;
 
     uint16_t sem_reg = fpga_readSemReg();
     cnc_ctx.field.sem_ena	= (sem_reg & SEM_ENA_MSK) != 0;

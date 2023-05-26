@@ -74,18 +74,20 @@ typedef union {
         uint32_t pump_ena:1;
         uint32_t drum_state:2;
         uint32_t wire_ena:1;
-        uint32_t voltage_ena:1;
+
+        uint32_t hv_ena:1;
         uint32_t hold_ena:1;
         uint32_t center_ena:1;
         uint32_t is_init:1;
 
         uint32_t drum_vel:7;
-        uint32_t dia_ena:1;
+        uint32_t d_ena:1;
 
         uint32_t uv_ena:1;
         uint32_t enc_ena:1;
         uint32_t rev:1;
         uint32_t rollback:1;
+
         uint32_t attempt:3;
         uint32_t acc_ena:1;
 
@@ -94,15 +96,21 @@ typedef union {
         // 1
         uint32_t pulse_width:8;
         uint32_t pulse_ratio:8;
-        uint32_t voltage_level:8;
+
+        uint32_t low_hv_ena:1;
+        uint32_t :7;
+
         uint32_t current_index:8;
 
         // 2, 3, 4, 5, 6
         int32_t id, x, y, u, v;
+
         // 7, 8
         int32_t enc_x, enc_y;
+
         // 9, 10
         float T, T_cur; // clocks/mm
+
         // 11
         float step; // mm
 
@@ -111,25 +119,29 @@ typedef union {
         uint32_t limsw_rev:1;
         uint32_t limsw_alm:1;
         uint32_t wire_break:1;
+
         uint32_t pwr:1;
         uint32_t fb_stop:1;
         uint32_t fb_to:1;
-        uint32_t hv_ena:1;
+        uint32_t hv_enabled:1;
 
         uint32_t sem_ena:1;
         uint32_t sem:3;
+
         uint32_t fb_ena:1;
         uint32_t attempts:3;
 
         uint32_t center_state:3;
         uint32_t touch_state:3;
         uint32_t center_mode:2;
+
         uint32_t center_attempt:8;
 
         // 13
         uint32_t backup_valid:1; // must be last reg
         uint32_t read_valid:1;
         uint32_t :6;
+
         uint32_t center_attempts:8;
         uint32_t touch:8;
         uint32_t touches:8;

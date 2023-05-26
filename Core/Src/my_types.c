@@ -42,11 +42,11 @@ void fpoint_print(const fpoint_t* const pt) {
 }
 
 void print_cnc_context(const cnc_context_t* const ctx) {
-	printf("pump:%x drumSt:%x wire:%x hv:%x hold:%x\n", ctx->field.pump_ena, ctx->field.drum_state, ctx->field.wire_ena, ctx->field.voltage_ena, ctx->field.hold_ena);
+	printf("pump:%x drumSt:%x wire:%x hv:%x hold:%x\n", ctx->field.pump_ena, ctx->field.drum_state, ctx->field.wire_ena, ctx->field.hv_ena, ctx->field.hold_ena);
 	printf("drumVel:%x\n", ctx->field.drum_vel);
 	printf("uv:%x rev:%x enc:%x\n", ctx->field.uv_ena, ctx->field.rev, ctx->field.enc_ena);
 	printf("St:%x\n", ctx->field.state);
-	printf("pW:%d pR:%d hvLvl:%x I:%x\n", ctx->field.pulse_width, ctx->field.pulse_ratio, ctx->field.voltage_level, ctx->field.current_index);
+	printf("pW:%d pR:%d hvLvl:%x I:%x\n", ctx->field.pulse_width, ctx->field.pulse_ratio, ctx->field.low_hv_ena, ctx->field.current_index);
 	printf("ID:%d X:%d Y:%d U:%d V:%d\n", (int)ctx->field.id, (int)ctx->field.x, (int)ctx->field.y, (int)ctx->field.u, (int)ctx->field.v);
 	printf("encX:%d encY:%d\n", (int)ctx->field.enc_x, (int)ctx->field.enc_y);
 

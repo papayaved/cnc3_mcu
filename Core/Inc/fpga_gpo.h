@@ -29,8 +29,8 @@ size_t seek_index(const uint8_t* array, size_t size, uint8_t value);
 typedef union {
     uint32_t data;
     struct {
-    	uint32_t voltage_ena:1;
-    	uint32_t voltage_level:1;
+    	uint32_t hv_ena:1;
+    	uint32_t low_hv_ena:1;
     	uint32_t current_code:6;
 
     	uint32_t drum_state:2; // fwd = 1, rev = 2

@@ -9,7 +9,7 @@ static double H = 0; // height from bottom roller to workpiece bottom (XY), mm
 static double T = 0; // workpiece thickness, mm
 static BOOL valid = FALSE;
 
-static AXIS_T D_axis = AXIS_X; // roller plane
+static AXIS_T D_axis = AXIS_Y; // roller plane
 static double D = 0; // roller diameter, mm
 static BOOL d_valid = FALSE;
 
@@ -52,7 +52,7 @@ void uv_clearLHT() {
 }
 
 void uv_clearD() {
-	D_axis = AXIS_X;
+	D_axis = AXIS_Y;
 	D = 0;
 	d_valid = FALSE;
 }
@@ -90,7 +90,7 @@ void uv_defaultParam() {
 	T = UV_T;
 
 	D = UV_D + UV_WIRE_D / 2; // diameter + half of wire diameter
-	D_axis = AXIS_X;
+	D_axis = AXIS_Y;
 
 #ifndef STONE
 	valid = TRUE;
@@ -236,7 +236,7 @@ void uv_tb() {
 void uv_setD( double dia ) { D = dia; }
 double uv_getD() { return D; }
 
-void uv_setDAxis( BOOL axis ) { D_axis = axis; }
+void uv_setDAxis( BOOL axis ) { D_axis = axis != 0; }
 AXIS_T uv_getDAxis() { return D_axis; }
 
 BOOL uv_enableD(BOOL ena) {

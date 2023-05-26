@@ -58,7 +58,7 @@ void gpo_restore() {
 }
 
 #ifndef STONE
-static BOOL idle() { return !dato32.field.voltage_ena; }
+static BOOL idle() { return !dato32.field.hv_ena; }
 #endif
 
 //void gpo_setControls(uint64_t value) {
@@ -280,12 +280,12 @@ void gpo_setVoltageLevel(uint8_t code) {
 	if (code > 1)
 		code = 1;
 
-	dato32_reg.field.voltage_level = dato32.field.voltage_level = code;
+	dato32_reg.field.low_hv_ena = dato32.field.low_hv_ena = code;
 	dato32_valid = FALSE;
 }
 
 void gpo_disableVDP() {
-	dato32_reg.field.voltage_ena = dato32.field.voltage_ena = 0;
+	dato32_reg.field.hv_ena = dato32.field.hv_ena = 0;
 	dato32_reg.field.drum_state = dato32.field.drum_state = DRUM_DIS;
 	dato32_reg.field.pump_ena = dato32.field.pump_ena = 0;
 	dato32_valid = FALSE;
@@ -294,20 +294,20 @@ void gpo_disableVDP() {
 // return 1 - stop request
 int gpo_setVoltageEnable(BOOL value) {
 	value = value ? TRUE : FALSE;
-	BOOL ena = dato32.field.voltage_ena ? TRUE : FALSE;
+	BOOL ena = dato32.field.hv_ena ? TRUE : FALSE;
 
 	if (value == ena)
 		return 0;
 
 	if (value) {
 		if (getDrumEnable(dato32.data) && dato32.field.pump_ena) {
-			dato32_reg.field.voltage_ena = dato32.field.voltage_ena = 1;
+			dato32_reg.field.hv_ena = dato32.field.hv_ena = 1;
 			dato32_valid = FALSE;
 			updateIndicator();
 		}
 	}
 	else if (ena) { // Disable
-		dato32_reg.field.voltage_ena = dato32.field.voltage_ena = 0;
+		dato32_reg.field.hv_ena = dato32.field.hv_ena = 0;
 		gpo_setDrumEnable(FALSE);
 		dato32_reg.field.pump_ena = dato32.field.pump_ena = 0;
 		dato32_valid = FALSE;
@@ -467,11 +467,11 @@ uint8_t getPulseWidth(uint32_t value) {
 
 uint8_t getVoltageLevel(uint32_t value) {
 	const fpga_controls_t v = (fpga_controls_t)value;
-	return v.field.voltage_level;
+	return v.field.low_hv_ena;
 }
 BOOL getVoltageEnable(uint32_t value) {
 	const fpga_controls_t v = (fpga_controls_t)value;
-	return v.field.voltage_ena != 0;
+	return v.field.hv_ena != 0;
 }
 BOOL getPumpEnable(uint32_t value) {
 	const fpga_controls_t v = (fpga_controls_t)value;
@@ -479,7 +479,7 @@ BOOL getPumpEnable(uint32_t value) {
 }
 
 BOOL gpo_getCncEnable() {
-	BOOL ena = dato32_valid && getDrumEnable(dato32.data) && dato32.field.pump_ena && dato32.field.current_code != 0 && dato32.field.voltage_ena;
+	BOOL ena = dato32_valid && getDrumEnable(dato32.data) && dato32.field.pump_ena && dato32.field.current_code != 0 && dato32.field.hv_ena;
 #ifdef STONE
 	return ena;
 #else
@@ -488,7 +488,7 @@ BOOL gpo_getCncEnable() {
 }
 
 BOOL gpo_isRun() {
-	return dato32.field.voltage_ena || dato32.field.pump_ena || dato32.field.drum_state == DRUM_FWD || dato32.field.drum_state == DRUM_REV;
+	return dato32.field.hv_ena || dato32.field.pump_ena || dato32.field.drum_state == DRUM_FWD || dato32.field.drum_state == DRUM_REV;
 }
 
 // LIM SW MASK
