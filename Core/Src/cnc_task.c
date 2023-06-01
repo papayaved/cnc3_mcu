@@ -794,7 +794,7 @@ static void motor_sm() {
 		N_reg = pa_getStrNum(); // for context
 
 		// Speed
-		if (cmd.valid.flag.F)
+		if (cmd.valid.flag.F && !rev)
 			cnc_setSpeed(cmd.F);
 		else
 			T = T_reg;
@@ -806,7 +806,7 @@ static void motor_sm() {
 			printf("END\n");
 #endif
 		}
-		else if (cmd.valid.flag.M)
+		else if (cmd.valid.flag.M && !rev)
 			cnc_setMCmd(&cmd);
 		else if (cmd.valid.flag.G) {
 			switch (cmd.G) {

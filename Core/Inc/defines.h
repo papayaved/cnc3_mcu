@@ -38,6 +38,7 @@
  * 1.17 - soft pult abort at alarm
  * 3.0.1.18 - locked drum in FPGA (todo as in cnc2), move state machine alarm_sm to a separated file and rewrite logic, changed M commands, added low and high voltage thresholds
  * 3.1.3.2 - adding acceleration and deceleration by path. Sync version number this CNC2.0
+ * 3.1.3.3 - no F flag and M-codes for reverse
  */
 
 #define DESC ("Meatec;CNC;Mikhail Menshikov")
@@ -45,7 +46,7 @@
 #define FAC_VER (3) // CNC3
 #define FAC_REV (1)
 #define VER (3)
-#define REV (2)
+#define REV (3)
 
 #ifndef MAX
 	#define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
