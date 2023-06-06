@@ -49,6 +49,7 @@ void com_task() {
 
 	if (size) {
 		soft_wdt_clear();
+		burst_read_reset(); // any received packet cancels the burst reading
 
 		COMMAND_T cmd = rx_buf_cmd();
 		uint32_t addr = rx_buf_addr();
