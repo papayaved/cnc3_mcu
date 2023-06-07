@@ -1,2 +1,2 @@
 # cnc3_mcu
- CNC3 MCU TrueStudio
+Wire-cut CNC machine (EDM and stone). STM32 project for TrueStudio
