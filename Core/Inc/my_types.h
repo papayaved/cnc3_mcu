@@ -12,6 +12,7 @@ typedef enum {FALSE, TRUE} BOOL;
 
 // CNC
 typedef enum {AXIS_X, AXIS_Y, AXIS_U, AXIS_V, MOTORS} AXIS_T;
+typedef enum { DIR_PLUS = 0, DIR_MINUS = 1 } DIR_T;
 
 typedef struct { int32_t x, y; } point_t;
 

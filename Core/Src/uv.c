@@ -10,8 +10,9 @@ static double T = 0; // workpiece thickness, mm
 static BOOL valid = FALSE;
 
 static AXIS_T D_axis = AXIS_Y; // roller plane
-static double D = 0; // roller diameter, mm
-static BOOL d_valid = FALSE;
+static DIR_T D_dir = DIR_MINUS; // wire side
+static double R = 0; // roller diameter, mm
+static BOOL D_valid = FALSE;
 
 int32_t u_max = (int32_t)INT32_MAX, u_min = (int32_t)INT32_MIN; // todo
 int32_t v_max = (int32_t)INT32_MAX, v_min = (int32_t)INT32_MIN;
@@ -53,8 +54,9 @@ void uv_clearLHT() {
 
 void uv_clearD() {
 	D_axis = AXIS_Y;
-	D = 0;
-	d_valid = FALSE;
+	D_dir = DIR_MINUS;
+	R = 0;
+	D_valid = FALSE;
 }
 
 BOOL uv_enableLHT(BOOL ena) {
@@ -89,20 +91,21 @@ void uv_defaultParam() {
 	H = UV_H;
 	T = UV_T;
 
-	D = UV_D + UV_WIRE_D / 2; // diameter + half of wire diameter
+	R = UV_D + UV_WIRE_D / 2; // diameter + half of wire diameter
 	D_axis = AXIS_Y;
+	D_dir = DIR_MINUS;
 
 #ifndef STONE
 	valid = TRUE;
-	d_valid = FALSE;
+	D_valid = FALSE;
 #else
-	valid = d_valid = FALSE;
+	valid = D_valid = FALSE;
 #endif
 }
 
 BOOL uv_valid() { return valid; }
 
-// it's a formula of line. It get 2 points (x,z) and return x coordinate for arbitrary z
+// This is a formula of a line. It gets 2 points (x,z) and returns the x coordinate for arbitrary z
 static double line_xz(double x0, double x1, double z0, double z1, double z) {
 	if (!valid || z1 == z0)
 		return x0;
@@ -233,28 +236,61 @@ void uv_tb() {
 
 // Roller compensation
 
-void uv_setD( double dia ) { D = dia; }
-double uv_getD() { return D; }
+void uv_setD( double dia ) { R = 0.5 * dia; }
+double uv_getD() { return 2 * R; }
 
 void uv_setDAxis( BOOL axis ) { D_axis = axis != 0; }
 AXIS_T uv_getDAxis() { return D_axis; }
 
+void uv_setDDir(DIR_T dir) { D_dir = dir != 0; }
+DIR_T uv_getDDir() { return D_dir; }
+
 BOOL uv_enableD(BOOL ena) {
 #ifndef STONE
-	if (ena != 0 && D >= UV_D_MIN && D <= UV_D_MAX && (D_axis == AXIS_X || D_axis == AXIS_Y))
-		d_valid = TRUE;
+	if (ena != 0 && R >= (UV_D_MIN / 2) && R <= (UV_D_MAX / 2) && (D_axis == AXIS_X || D_axis == AXIS_Y))
+		D_valid = TRUE;
 	else
 		uv_clearD();
 
 #ifdef PRINT
-	printf("Roller:%x\n", valid);
+	printf("Roller:%x\n", D_valid);
 #endif
 
 #else
-	d_valid = FALSE;
+	D_valid = FALSE;
 #endif
 
-	return d_valid;
+	return D_valid;
 }
 
-BOOL uv_DValid() { return valid && d_valid; }
+BOOL uv_DValid() { return valid && D_valid; }
+
+void roller_error_Y(double dU, double dV, double* const p_eX, double* const p_eY) {
+	dU = fabs(dU);
+	dV = fabs(dV);
+
+	double a = sqrt(L * L + dV * dV);
+	*p_eY = R * (a - 1);
+	*p_eX = R * dV * dU / (a * L);
+
+	if (D_dir == DIR_MINUS) {
+		eY = -eY;
+
+		if (dV < 0) {
+			eX = dU < 0 ? -eX : eX;
+		} else {
+			eX = dU < 0 ? eX : -eX;
+		}
+	} else {
+
+	}
+}
+
+void roller_error(double dU, double dV, double* const eX, double* const eY) {
+	if (D_axis == AXIS_Y) {
+		roller_error_Y(dU, dV, eX, eY);
+	}
+	else {
+		roller_error_Y(dV, dU, eY, eX);
+	}
+}

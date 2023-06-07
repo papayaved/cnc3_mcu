@@ -34,6 +34,9 @@ double uv_getD();
 void uv_setDAxis(BOOL a);
 AXIS_T uv_getDAxis();
 
+void uv_setDDir(DIR_T dir);
+DIR_T uv_getDDir();
+
 BOOL uv_enableD(BOOL ena);
 BOOL uv_DValid();
 
