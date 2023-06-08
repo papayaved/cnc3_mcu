@@ -62,7 +62,7 @@ cnc_context_t* cnc_ctx_getForce() {
 	cnc_ctx.field.is_init = cnc_isInit();
 
 	cnc_ctx.field.drum_vel = data32_reg.field.drum_vel;
-	cnc_ctx.field.d_ena = uv_DValid();
+	cnc_ctx.field.d_ena = uv_D_ena();
 
 	cnc_ctx.field.low_hv_ena = data32_reg.field.low_hv_ena;
 	cnc_ctx.field.current_index = getCurrentIndex(data32_reg.data);

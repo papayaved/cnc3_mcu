@@ -59,3 +59,9 @@ void print_cnc_context(const cnc_context_t* const ctx) {
 
 	printf("bkp:%x read:%x\n", ctx->field.backup_valid, ctx->field.read_valid);
 }
+
+void swap_coord(fpoint_t* const err) {
+	double tmp = err->x;
+	err->x = err->y;
+	err->y = tmp;
+}

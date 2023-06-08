@@ -11,6 +11,7 @@ static BOOL valid = FALSE;
 
 static AXIS_T D_axis = AXIS_Y; // roller plane
 static DIR_T D_dir = DIR_MINUS; // wire side
+static BOOL D_tilt = FALSE; // wire side
 static double R = 0; // roller diameter, mm
 static BOOL D_valid = FALSE;
 
@@ -245,6 +246,9 @@ AXIS_T uv_getDAxis() { return D_axis; }
 void uv_setDDir(DIR_T dir) { D_dir = dir != 0; }
 DIR_T uv_getDDir() { return D_dir; }
 
+void uv_setDTilt(BOOL ena) { D_tilt = ena != 0; }
+BOOL uv_getDTilt() { return D_tilt; }
+
 BOOL uv_enableD(BOOL ena) {
 #ifndef STONE
 	if (ena != 0 && R >= (UV_D_MIN / 2) && R <= (UV_D_MAX / 2) && (D_axis == AXIS_X || D_axis == AXIS_Y))
@@ -263,34 +267,51 @@ BOOL uv_enableD(BOOL ena) {
 	return D_valid;
 }
 
-BOOL uv_DValid() { return valid && D_valid; }
+BOOL uv_D_ena() { return valid && D_valid; }
 
-void roller_error_Y(double dU, double dV, double* const p_eX, double* const p_eY) {
-	dU = fabs(dU);
-	dV = fabs(dV);
+fpoint_t roller_error_Y(const double* const p_dU, const double* const p_dV) {
+	static BOOL sign_dU, sign_dV;
+	static double dU, dV;
+	static fpoint_t err;
+
+	sign_dU = *p_dU < 0;
+	sign_dV = *p_dV < 0;
+
+	dU = fabs(*p_dU);
+	dV = fabs(*p_dV);
 
 	double a = sqrt(L * L + dV * dV);
-	*p_eY = R * (a - 1);
-	*p_eX = R * dV * dU / (a * L);
+	err.y = R * (a / L - 1);
+	err.x = D_tilt ? 0 : R * dV * dU / (a * L);
 
 	if (D_dir == DIR_MINUS) {
-		eY = -eY;
+		err.y = -err.y;
 
-		if (dV < 0) {
-			eX = dU < 0 ? -eX : eX;
+		if (sign_dV) {
+			err.x = sign_dU ? -err.x : err.x;
 		} else {
-			eX = dU < 0 ? eX : -eX;
+			err.x = sign_dU ? err.x : -err.x;
 		}
 	} else {
-
+		if (sign_dV) {
+			err.x = sign_dU ? err.x : -err.x;
+		} else {
+			err.x = sign_dU ? -err.x : err.x;
+		}
 	}
+
+	return err;
 }
 
-void roller_error(double dU, double dV, double* const eX, double* const eY) {
-	if (D_axis == AXIS_Y) {
-		roller_error_Y(dU, dV, eX, eY);
-	}
-	else {
-		roller_error_Y(dV, dU, eY, eX);
-	}
+// Error depend only on dU, dV and roller diameter
+fpoint_t roller_error(double dU, double dV) {
+	static fpoint_t err;
+
+	if (D_axis == AXIS_Y)
+		return roller_error_Y(&dU, &dV);
+
+	err = roller_error_Y(&dV, &dU);
+	swap_coord(&err);
+
+	return err;
 }

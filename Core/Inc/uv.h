@@ -37,8 +37,13 @@ AXIS_T uv_getDAxis();
 void uv_setDDir(DIR_T dir);
 DIR_T uv_getDDir();
 
+void uv_setDTilt(BOOL ena);
+BOOL uv_getDTilt();
+
 BOOL uv_enableD(BOOL ena);
-BOOL uv_DValid();
+BOOL uv_D_ena();
+
+fpoint_t roller_error(double dU, double dV);
 
 //
 double uv_X_to_motor(double X, double U);

@@ -952,6 +952,15 @@ static void motor_sm() {
 					fpoint_t xy_mm = {cmd.X, cmd.Y};
 					fpoint_t uv_mm = {cmd.U, cmd.V};
 
+					if (uv_D_ena()) {
+						fpoint_t err = roller_error(uv_mm.x - xy_mm.x, uv_mm.y - xy_mm.y);
+						xy_mm.x -= err.x;
+						xy_mm.y -= err.y;
+
+						uv_mm.x -= err.x;
+						uv_mm.y -= err.y;
+					}
+
 					fpoint_t mtr_mm		= uv_XY_to_motors(&xy_mm, &uv_mm);
 					fpoint_t mtr_uv_mm	= uv_UV_to_motors(&xy_mm, &uv_mm);
 
@@ -1106,6 +1115,15 @@ static void motor_sm() {
 				if (pa_plane() == PLANE_XY && valid[0])
 					next = fpoint_mm_to_steps(&xy_mm, cnc_scaleXY());
 				else if (pa_plane() == PLANE_XYUV && valid[0] && valid[1]) {
+					if (uv_D_ena()) {
+						fpoint_t err = roller_error(uv_mm.x - xy_mm.x, uv_mm.y - xy_mm.y);
+						xy_mm.x -= err.x; // error depend only on dU, dV position
+						xy_mm.y -= err.y;
+
+						uv_mm.x -= err.x;
+						uv_mm.y -= err.y;
+					}
+
 					fpoint_t mtr_mm = uv_XY_to_motors(&xy_mm, &uv_mm);
 					fpoint_t mtr_uv_mm = uv_UV_to_motors(&xy_mm, &uv_mm);
 
@@ -1352,11 +1370,23 @@ BOOL cnc_setMCmd(const gcmd_t* const cmd) {
 			break;
 			
 		case 102:
-			if (cmd->valid.flag.P && cmd->valid.flag.Q) {
+			if (cmd->valid.flag.P) {
 				uv_setD( gcmd_P(cmd) );
-				uv_setDAxis( (int)gcmd_Q(cmd) );
 				uv_enableD(TRUE);
 			}
+
+			if (cmd->valid.flag.P && cmd->valid.flag.Q)
+				uv_setDTilt( (int)gcmd_Q(cmd) );
+
+			break;
+
+		case 103:
+			if (cmd->valid.flag.P)
+				uv_setDAxis( (int)gcmd_P(cmd) );
+
+			if (cmd->valid.flag.P && cmd->valid.flag.Q)
+				uv_setDDir( (int)gcmd_Q(cmd) );
+
 			break;
 
 		case 105:

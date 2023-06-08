@@ -166,4 +166,6 @@ void fpoint_print(const fpoint_t* const pt);
 
 void print_cnc_context(const cnc_context_t* const ctx);
 
+void swap_coord(fpoint_t* const err);
+
 #endif /* SRC_MY_TYPES_H_ */
