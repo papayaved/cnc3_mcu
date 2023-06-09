@@ -1376,7 +1376,7 @@ BOOL cnc_setMCmd(const gcmd_t* const cmd) {
 			}
 
 			if (cmd->valid.flag.P && cmd->valid.flag.Q)
-				uv_setDTilt( (int)gcmd_Q(cmd) );
+				uv_setDTiltEna( (int)gcmd_Q(cmd) );
 
 			break;
 

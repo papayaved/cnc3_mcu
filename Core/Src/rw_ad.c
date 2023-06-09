@@ -246,7 +246,7 @@ void ad_writeRegs(const size_t addr, size_t len, const uint8_t buf[], const size
 						uv_enableD((wrdata & 2) && uv_valid());
 						uv_setDAxis(wrdata & 4);
 						uv_setDDir(wrdata & 8);
-						uv_setDTilt(wrdata & 0x10);
+						uv_setDTiltEna(wrdata & 0x10);
 						break;
 
 					case 0xFF: test_reg = wrdata; break;
@@ -497,7 +497,7 @@ uint8_t ad_readRegs(uint32_t addr, size_t len, BOOL burst) {
 					case 0x82: *pfloat = uv_getT(); break;
 					case 0x83: *pfloat = uv_getD(); break;
 					case 0x84:
-						rddata = ((uint32_t)uv_getDTilt() & 1)<<4 | ((uint32_t)uv_getDDir() & 1)<<3 | ((uint32_t)uv_getDAxis() & 1)<<2 | (uint32_t)uv_D_ena()<<1 | (uint32_t)uv_valid() << 0;
+						rddata = ((uint32_t)uv_getDTiltEna() & 1)<<4 | ((uint32_t)uv_getDDir() & 1)<<3 | ((uint32_t)uv_getDAxis() & 1)<<2 | (uint32_t)uv_D_ena()<<1 | (uint32_t)uv_valid() << 0;
 						break;
 
 					case 0xE0: rddata = desc32[0]; break;

@@ -11,7 +11,7 @@ static BOOL valid = FALSE;
 
 static AXIS_T D_axis = AXIS_Y; // roller plane
 static DIR_T D_dir = DIR_MINUS; // wire side
-static BOOL D_tilt = FALSE; // wire side
+static BOOL D_tilt_ena = FALSE; // wire side
 static double R = 0; // roller diameter, mm
 static BOOL D_valid = FALSE;
 
@@ -246,8 +246,8 @@ AXIS_T uv_getDAxis() { return D_axis; }
 void uv_setDDir(DIR_T dir) { D_dir = dir != 0; }
 DIR_T uv_getDDir() { return D_dir; }
 
-void uv_setDTilt(BOOL ena) { D_tilt = ena != 0; }
-BOOL uv_getDTilt() { return D_tilt; }
+void uv_setDTiltEna(BOOL ena) { D_tilt_ena = ena != 0; }
+BOOL uv_getDTiltEna() { return D_tilt_ena; }
 
 BOOL uv_enableD(BOOL ena) {
 #ifndef STONE
@@ -271,7 +271,7 @@ BOOL uv_D_ena() { return valid && D_valid; }
 
 fpoint_t roller_error_Y(const double* const p_dU, const double* const p_dV) {
 	static BOOL sign_dU, sign_dV;
-	static double dU, dV;
+	static double dU, dV, L2, a, b;
 	static fpoint_t err;
 
 	sign_dU = *p_dU < 0;
@@ -280,25 +280,36 @@ fpoint_t roller_error_Y(const double* const p_dU, const double* const p_dV) {
 	dU = fabs(*p_dU);
 	dV = fabs(*p_dV);
 
-	double a = sqrt(L * L + dV * dV);
-	err.y = R * (a / L - 1);
-	err.x = D_tilt ? 0 : R * dV * dU / (a * L);
+	L2 = L * L;
+	a = sqrt(L2 + dV * dV);
 
-	if (D_dir == DIR_MINUS) {
-		err.y = -err.y;
+	if (D_tilt_ena) {
+		b = sqrt(L2 + dU * dU);
 
-		if (sign_dV) {
-			err.x = sign_dU ? -err.x : err.x;
+		err.y = R * (a - L) / b;
+		err.x = 0;
+	}
+	else {
+		err.y = R * (a / L - 1);
+		err.x = R * dV * dU / (a * L);
+
+		if (D_dir == DIR_MINUS) {
+			if (sign_dV) {
+				err.x = sign_dU ? -err.x : err.x;
+			} else {
+				err.x = sign_dU ? err.x : -err.x;
+			}
 		} else {
-			err.x = sign_dU ? err.x : -err.x;
-		}
-	} else {
-		if (sign_dV) {
-			err.x = sign_dU ? err.x : -err.x;
-		} else {
-			err.x = sign_dU ? -err.x : err.x;
+			if (sign_dV) {
+				err.x = sign_dU ? err.x : -err.x;
+			} else {
+				err.x = sign_dU ? -err.x : err.x;
+			}
 		}
 	}
+
+	if (D_dir == DIR_MINUS)
+		err.y = -err.y;
 
 	return err;
 }

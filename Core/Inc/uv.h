@@ -37,8 +37,8 @@ AXIS_T uv_getDAxis();
 void uv_setDDir(DIR_T dir);
 DIR_T uv_getDDir();
 
-void uv_setDTilt(BOOL ena);
-BOOL uv_getDTilt();
+void uv_setDTiltEna(BOOL ena);
+BOOL uv_getDTiltEna();
 
 BOOL uv_enableD(BOOL ena);
 BOOL uv_D_ena();
