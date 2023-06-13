@@ -14,6 +14,8 @@
 
 extern int32_t u_max, u_min, v_max, v_min;
 
+void uv_clear();
+
 void uv_setL(double value);
 double uv_getL();
 void uv_setH(double value);
@@ -37,8 +39,8 @@ AXIS_T uv_getDAxis();
 void uv_setDDir(DIR_T dir);
 DIR_T uv_getDDir();
 
-void uv_setDTiltEna(BOOL ena);
-BOOL uv_getDTiltEna();
+void uv_enableDTilted(BOOL ena);
+BOOL uv_D_tiltedEna();
 
 BOOL uv_enableD(BOOL ena);
 BOOL uv_D_ena();

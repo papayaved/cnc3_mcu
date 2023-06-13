@@ -81,7 +81,8 @@ typedef union {
         uint32_t center_ena:1;
         uint32_t is_init:1;
 
-        uint32_t drum_vel:7;
+        uint32_t drum_vel:6;
+        uint32_t tilted_ena:1;
         uint32_t d_ena:1;
 
         uint32_t uv_ena:1;

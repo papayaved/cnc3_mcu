@@ -11,7 +11,7 @@ static BOOL valid = FALSE;
 
 static AXIS_T D_axis = AXIS_Y; // roller plane
 static DIR_T D_dir = DIR_MINUS; // wire side
-static BOOL D_tilt_ena = FALSE; // wire side
+static BOOL D_tilted_ena = FALSE; // wire side
 static double R = 0; // roller diameter, mm
 static BOOL D_valid = FALSE;
 
@@ -56,6 +56,7 @@ void uv_clearLHT() {
 void uv_clearD() {
 	D_axis = AXIS_Y;
 	D_dir = DIR_MINUS;
+	D_tilted_ena = FALSE;
 	R = 0;
 	D_valid = FALSE;
 }
@@ -95,6 +96,7 @@ void uv_defaultParam() {
 	R = UV_D + UV_WIRE_D / 2; // diameter + half of wire diameter
 	D_axis = AXIS_Y;
 	D_dir = DIR_MINUS;
+	D_tilted_ena = FALSE;
 
 #ifndef STONE
 	valid = TRUE;
@@ -246,8 +248,8 @@ AXIS_T uv_getDAxis() { return D_axis; }
 void uv_setDDir(DIR_T dir) { D_dir = dir != 0; }
 DIR_T uv_getDDir() { return D_dir; }
 
-void uv_setDTiltEna(BOOL ena) { D_tilt_ena = ena != 0; }
-BOOL uv_getDTiltEna() { return D_tilt_ena; }
+void uv_enableDTilted(BOOL ena) { D_tilted_ena = ena != 0; }
+BOOL uv_D_tiltedEna() { return valid && D_valid && D_tilted_ena; }
 
 BOOL uv_enableD(BOOL ena) {
 #ifndef STONE
@@ -283,7 +285,7 @@ fpoint_t roller_error_Y(const double* const p_dU, const double* const p_dV) {
 	L2 = L * L;
 	a = sqrt(L2 + dV * dV);
 
-	if (D_tilt_ena) {
+	if (D_tilted_ena) {
 		b = sqrt(L2 + dU * dU);
 
 		err.y = R * (a - L) / b;
